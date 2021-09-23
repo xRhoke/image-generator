@@ -21,14 +21,18 @@ public class Application extends JPanel{
 
     //Image meta data
     private static int imageCount = 0;
-    private static int redScore;
-    private static int greenScore;
-    private static int blueScore;
+    private static int fireScore;
+    private static int earthScore;
+    private static int waterScore;
+    private static int darkScore;
+    private static int lightScore;
 
     //Collection meta data
-    private static int maxRed = 0;
-    private static int maxGreen = 0;
-    private static int maxBlue = 0;
+    private static int maxFire = 0;
+    private static int maxEarth = 0;
+    private static int maxWater = 0;
+    private static int maxDark = 0;
+    private static int maxLight = 0;
 
     public static void main(String[] args) {
         frame = new JFrame("Super Sweet NFT");
@@ -53,7 +57,7 @@ public class Application extends JPanel{
         exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent evt){
-                exportImages(1000);
+                exportImages(100);
             }
         });
 
@@ -70,7 +74,7 @@ public class Application extends JPanel{
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        generateImage(g, 40, 4);
+        generateImage(g, 10, 8);
     }
 
     private static Color generateRandomColor() {
@@ -98,9 +102,10 @@ public class Application extends JPanel{
 
     private static void generateImage(Graphics g, int squareSize, int chanceOfBlack){
         Color[] colors = buildColors(chanceOfBlack);
-        redScore = 0;
-        greenScore = 0;
-        blueScore = 0;
+        fireScore = 0;
+        earthScore = 0;
+        waterScore = 0;
+        lightScore = 0;
 
         for (int i = 0; i < canvas.getWidth(); i++) {
             Color[] shuffledColors = shuffleColors(colors);
@@ -108,19 +113,24 @@ public class Application extends JPanel{
 
             for (int j = 0; j < canvas.getHeight()/2; j++) {
                 color = shuffledColors[getRandomNumber(0, shuffledColors.length - 1)];
-                redScore += color.getRed();
-                blueScore += color.getBlue();
-                greenScore += color.getGreen();
+                fireScore += color.getRed();
+                waterScore += color.getBlue();
+                earthScore += color.getGreen();
+                darkScore += (255*3) - color.getRed() - color.getGreen() - color.getBlue();
                 generateSquare(g, color, j * squareSize, i * squareSize, squareSize);
                 generateSquare(g, color, canvas.getHeight() - (j + 1) * squareSize, i * squareSize, squareSize);
             }
         }
-        redScore = redScore/10000;
-        greenScore = greenScore/10000;
-        blueScore = blueScore/10000;
-        if(redScore > maxRed) maxRed = redScore;
-        if(greenScore > maxGreen) maxGreen = greenScore;
-        if(blueScore > maxBlue) maxBlue = blueScore;
+        fireScore = fireScore/10000;
+        earthScore = earthScore/10000;
+        waterScore = waterScore/10000;
+        darkScore = darkScore/100000;
+        lightScore = fireScore+earthScore+waterScore;
+        if(fireScore > maxFire) maxFire = fireScore;
+        if(earthScore > maxEarth) maxEarth = earthScore;
+        if(waterScore > maxWater) maxWater = waterScore;
+        if(darkScore > maxDark) maxDark = darkScore;
+        if(lightScore > maxLight) maxLight = lightScore;
     }
 
     private static Color[] shuffleColors(Color[] colors) {
@@ -153,14 +163,19 @@ public class Application extends JPanel{
             canvas.printAll(g);
             g.dispose();
             try {
-                ImageIO.write(image, "png", new File(String.format("./images/NFT_%s.png", imageCount)));
+                ImageIO.write(image, "png", new File(String.format("./images/Rune_%s.png", imageCount)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.printf("NGT_%s created with Red:%s, Green:%s, Blue:%s\n", imageCount, redScore, greenScore, blueScore);
+            System.out.printf("Rune_%s created with Fire:%s, Earth:%s, Water:%s, Dark:%s, Light:%s\n", imageCount, fireScore, earthScore, waterScore, darkScore, lightScore);
             imageCount++;
             i++;
         }
-        System.out.printf("Max red:%s, Max green:%s, Max blue:%s", maxRed, maxGreen, maxBlue);
+        System.out.printf("\nMax Fire:%s\n" +
+                "Max Earth:%s\n" +
+                "Max Water:%s\n" +
+                "Max Dark:%s\n" +
+                "Max Light:%s\n",
+                maxFire, maxEarth, maxWater, maxDark, maxLight);
     }
 }
