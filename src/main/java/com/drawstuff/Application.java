@@ -1,24 +1,68 @@
 package com.drawstuff;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class Application extends JPanel{
 
     private static JPanel canvas;
+    private static JFrame frame;
+    private static JButton drawButton;
+    private static JButton exportButton;
+    private static JPanel buttonPanel;
+
+    //Image meta data
+    private static int imageCount = 0;
+    private static int redScore;
+    private static int greenScore;
+    private static int blueScore;
+
+    //Collection meta data
+    private static int maxRed = 0;
+    private static int maxGreen = 0;
+    private static int maxBlue = 0;
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Super Sweet NFT");
+        frame = new JFrame("Super Sweet NFT");
         canvas = new Application();
-        canvas.setPreferredSize(new Dimension(600, 620));
-        canvas.setBackground(Color.black);
+        buttonPanel = new JPanel();
+        drawButton = new JButton("Draw");
+        exportButton = new JButton("Export");
+
+        canvas.setSize(new Dimension(500, 500));
+        canvas.setBackground(Color.BLACK);
+
+        buttonPanel.add(drawButton);
+        buttonPanel.add(exportButton);
+
+        drawButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent evt){
+                canvas.repaint();
+            }
+        });
+
+        exportButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent evt){
+                exportImages(1000);
+            }
+        });
 
         frame.pack();
-        frame.setSize(new Dimension(600, 630));
-        frame.setContentPane(canvas);
+        frame.setSize(new Dimension(500, 500));
+        frame.setLayout(new BorderLayout());
+        frame.add(canvas);
+        frame.add(buttonPanel);
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
@@ -26,112 +70,97 @@ public class Application extends JPanel{
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        loopOverGrid(g);
-    }
-
-    private static void generateRandomShapes(Graphics g, int shapes) {
-        for (int i = 0; i < shapes; i++) {
-            if (getRandomNumber(0, 100) <= 80) generateCircle(g);
-            else generateRectangle(g);
-        }
+        generateImage(g, 40, 4);
     }
 
     private static Color generateRandomColor() {
         int max = 255;
         int min = 0;
+
         int redValue = getRandomNumber(min, max);
         int greenValue = getRandomNumber(min, max);
         int blueValue = getRandomNumber(min, max);
 
-        return new Color(redValue, greenValue, blueValue);
+        Color randomColor = new Color(redValue, greenValue, blueValue);
+        return randomColor;
     }
 
-    private static void generateRectangle(Graphics g){
-        int minWidth = 10;
-        int maxWidth = canvas.getWidth()/2;
-
-        int minHeight = 10;
-        int maxHeight = canvas.getHeight()/2;
-
-        int width = getRandomNumber(minWidth, maxWidth);
-        int height = getRandomNumber(minHeight, maxHeight);
-
-        int x = getRandomNumber(width, canvas.getWidth()) - width;
-        int y = getRandomNumber(height, canvas.getHeight()) - height;
-
-        g.setColor(generateRandomColor());
-        g.fillRect(x, y, width, height);
-    }
-
-    private static void generateRectangle10x10(Graphics g, Color color, int x, int y){
-        int width = 10;
-        int height = 10;
-
+    private static void generateSquare(Graphics g, Color color, int xPos, int yPos, int squareSize){
+        int width = squareSize;
+        int height = squareSize;
         g.setColor(color);
-        g.fillRect(x, y, width, height);
-    }
-
-    private static void generateCircle(Graphics g){
-        Graphics2D g2 = (Graphics2D) g;
-        int minWidth = 10;
-        int maxWidth = canvas.getWidth()/4;
-
-        int minHeight = 10;
-        int maxHeight = canvas.getHeight()/4;
-
-        int width = getRandomNumber(minWidth, maxWidth);
-        int height = getRandomNumber(minHeight, maxHeight);
-
-        int x = getRandomNumber(width, canvas.getWidth()) - width;
-        int y = getRandomNumber(height, canvas.getHeight()) - height;
-
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(generateRandomColor());
-        g2.fillOval(x, y, width, height);
+        g.fillRect(xPos, yPos, width, height);
     }
 
     private static int getRandomNumber(int min, int max){
         return new Random().nextInt(max - min + 1) + min;
     }
 
-    private static void loopOverGridSection(Graphics g, int startX, int startY){
-        int colorSize = 9;
-        Color[] colors = new Color[colorSize];
-        for (int m = 0; m < 3; m++) {
-            colors[m] = generateRandomColor();
-        }
+    private static void generateImage(Graphics g, int squareSize, int chanceOfBlack){
+        Color[] colors = buildColors(chanceOfBlack);
+        redScore = 0;
+        greenScore = 0;
+        blueScore = 0;
 
-        for (int m = 3; m < colorSize; m++) {
-            colors[m] = Color.BLACK;
-        }
-        Color color;
+        for (int i = 0; i < canvas.getWidth(); i++) {
+            Color[] shuffledColors = shuffleColors(colors);
+            Color color;
 
-        for (int i = 0; i < 10; i++) {
-            //shuffle colors
-            Color[] shuffledColors = new Color[3];
-            for (int j = 0; j < 3; j++) {
-                shuffledColors[j] = colors[getRandomNumber(0, colorSize - 1)];
-            }
-
-            for (int j = 0; j < 10; j++) {
-                if (j == 0 || j == 9) color = shuffledColors[0];
-                else if (j == 1 || j == 8) color = shuffledColors[1];
-                else if (j == 2 || j == 7) color = shuffledColors[2];
-                else if (j == 3 || j == 6) color = shuffledColors[1];
-                else if (j == 4 || j == 5) color = shuffledColors[0];
-                else color = Color.BLACK;
-                generateRectangle10x10(g, color, startX + j * 10, startY + i * 10);
+            for (int j = 0; j < canvas.getHeight()/2; j++) {
+                color = shuffledColors[getRandomNumber(0, shuffledColors.length - 1)];
+                redScore += color.getRed();
+                blueScore += color.getBlue();
+                greenScore += color.getGreen();
+                generateSquare(g, color, j * squareSize, i * squareSize, squareSize);
+                generateSquare(g, color, canvas.getHeight() - (j + 1) * squareSize, i * squareSize, squareSize);
             }
         }
+        redScore = redScore/10000;
+        greenScore = greenScore/10000;
+        blueScore = blueScore/10000;
+        if(redScore > maxRed) maxRed = redScore;
+        if(greenScore > maxGreen) maxGreen = greenScore;
+        if(blueScore > maxBlue) maxBlue = blueScore;
     }
 
-    private static void loopOverGrid(Graphics g){
-
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                loopOverGridSection(g,i * 120, j * 120);
-            }
+    private static Color[] shuffleColors(Color[] colors) {
+        Color[] shuffledColors = new Color[colors.length];
+        for (int j = 0; j < shuffledColors.length; j++) {
+            shuffledColors[j] = colors[getRandomNumber(0, colors.length - 1)];
         }
+
+        return shuffledColors;
     }
 
+    private static Color[] buildColors(int chanceOfBlack) {
+        Color[] colors = new Color[chanceOfBlack + 3];
+        for (int i = 0; i < 3; i++) {
+            colors[i] = generateRandomColor();
+        }
+
+        for (int i = 3; i < colors.length; i++) {
+            colors[i] = Color.BLACK;
+        }
+
+        return colors;
+    }
+
+    private static void exportImages(int images){
+        int i = 0;
+        while (i < images) {
+            BufferedImage image = new BufferedImage(canvas.getWidth(), canvas.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = image.createGraphics();
+            canvas.printAll(g);
+            g.dispose();
+            try {
+                ImageIO.write(image, "png", new File(String.format("./images/NFT_%s.png", imageCount)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.printf("NGT_%s created with Red:%s, Green:%s, Blue:%s\n", imageCount, redScore, greenScore, blueScore);
+            imageCount++;
+            i++;
+        }
+        System.out.printf("Max red:%s, Max green:%s, Max blue:%s", maxRed, maxGreen, maxBlue);
+    }
 }
