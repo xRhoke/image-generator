@@ -110,8 +110,7 @@ public class Application extends JPanel{
         for (int i = 0; i < canvas.getWidth(); i++) {
             Color[] shuffledColors = shuffleColors(colors);
             Color color;
-
-            for (int j = 0; j < canvas.getHeight()/2; j++) {
+            for(int j = 0; j < canvas.getHeight()/2; j++){
                 color = shuffledColors[getRandomNumber(0, shuffledColors.length - 1)];
                 fireScore += color.getRed();
                 waterScore += color.getBlue();
@@ -119,6 +118,10 @@ public class Application extends JPanel{
                 darkScore += (255*3) - color.getRed() - color.getGreen() - color.getBlue();
                 generateSquare(g, color, j * squareSize, i * squareSize, squareSize);
                 generateSquare(g, color, canvas.getHeight() - (j + 1) * squareSize, i * squareSize, squareSize);
+            }
+            for (int j = canvas.getWidth()/2 - i; j > 0; j--) {
+                generateSquare(g, Color.BLACK, j * squareSize, i * squareSize, squareSize);
+                generateSquare(g, Color.BLACK, canvas.getHeight() - (j + 1) * squareSize, i * squareSize, squareSize);
             }
         }
         fireScore = fireScore/10000;
