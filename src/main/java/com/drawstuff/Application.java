@@ -57,12 +57,12 @@ public class Application extends JPanel{
         exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent evt){
-                exportImages(100);
+                exportImages(1);
             }
         });
 
         frame.pack();
-        frame.setSize(new Dimension(500, 500));
+        frame.setSize(new Dimension(515, 515));
         frame.setLayout(new BorderLayout());
         frame.add(canvas);
         frame.add(buttonPanel);
@@ -74,7 +74,7 @@ public class Application extends JPanel{
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        generateImage(g, 10, 8);
+        generateImage(g, 25, 2);
     }
 
     private static Color generateRandomColor() {
@@ -92,8 +92,10 @@ public class Application extends JPanel{
     private static void generateSquare(Graphics g, Color color, int xPos, int yPos, int squareSize){
         int width = squareSize;
         int height = squareSize;
+        int x = xPos * squareSize;
+        int y = yPos * squareSize;
         g.setColor(color);
-        g.fillRect(xPos, yPos, width, height);
+        g.fillRect(x, y, width, height);
     }
 
     private static int getRandomNumber(int min, int max){
@@ -107,27 +109,43 @@ public class Application extends JPanel{
         waterScore = 0;
         lightScore = 0;
 
-        for (int i = 0; i < canvas.getWidth(); i++) {
+        //create top half of rune
+        for (int i = 0; i < canvas.getWidth()/(squareSize*2); i++) {
             Color[] shuffledColors = shuffleColors(colors);
             Color color;
-            for(int j = 0; j < canvas.getHeight()/2; j++){
+            for(int j = canvas.getWidth()/(squareSize*2) - 1; j > canvas.getWidth()/(squareSize*2) - i; j--){
                 color = shuffledColors[getRandomNumber(0, shuffledColors.length - 1)];
                 fireScore += color.getRed();
                 waterScore += color.getBlue();
                 earthScore += color.getGreen();
                 darkScore += (255*3) - color.getRed() - color.getGreen() - color.getBlue();
-                generateSquare(g, color, j * squareSize, i * squareSize, squareSize);
-                generateSquare(g, color, canvas.getHeight() - (j + 1) * squareSize, i * squareSize, squareSize);
-            }
-            for (int j = canvas.getWidth()/2 - i; j > 0; j--) {
-                generateSquare(g, Color.BLACK, j * squareSize, i * squareSize, squareSize);
-                generateSquare(g, Color.BLACK, canvas.getHeight() - (j + 1) * squareSize, i * squareSize, squareSize);
+                generateSquare(g, color, j, i, squareSize);
+                generateSquare(g, color, canvas.getWidth()/squareSize - (j + 1), i, squareSize);
             }
         }
+
+        //create bottom half of rune
+        for (int i = canvas.getWidth()/(squareSize*2); i < canvas.getWidth()/squareSize - 2; i++) {
+            Color[] shuffledColors = shuffleColors(colors);
+            Color color;
+            System.out.println("new loop");
+            for(int j = i - canvas.getWidth()/(squareSize*2) + 2; j < canvas.getWidth()/(squareSize*2); j++){
+                System.out.printf("j is: %s\n", j);
+
+                color = shuffledColors[getRandomNumber(0, shuffledColors.length - 1)];
+                fireScore += color.getRed();
+                waterScore += color.getBlue();
+                earthScore += color.getGreen();
+                darkScore += (255*3) - color.getRed() - color.getGreen() - color.getBlue();
+                generateSquare(g, color, j, i, squareSize);
+                generateSquare(g, color, canvas.getWidth()/squareSize - (j + 1), i, squareSize);
+            }
+        }
+
         fireScore = fireScore/10000;
         earthScore = earthScore/10000;
         waterScore = waterScore/10000;
-        darkScore = darkScore/100000;
+        darkScore = darkScore/10000;
         lightScore = fireScore+earthScore+waterScore;
         if(fireScore > maxFire) maxFire = fireScore;
         if(earthScore > maxEarth) maxEarth = earthScore;
