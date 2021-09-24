@@ -57,7 +57,7 @@ public class Application extends JPanel{
         exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent evt){
-                exportImages(1);
+                exportImages(5);
             }
         });
 
@@ -128,10 +128,7 @@ public class Application extends JPanel{
         for (int i = canvas.getWidth()/(squareSize*2); i < canvas.getWidth()/squareSize - 2; i++) {
             Color[] shuffledColors = shuffleColors(colors);
             Color color;
-            System.out.println("new loop");
             for(int j = i - canvas.getWidth()/(squareSize*2) + 2; j < canvas.getWidth()/(squareSize*2); j++){
-                System.out.printf("j is: %s\n", j);
-
                 color = shuffledColors[getRandomNumber(0, shuffledColors.length - 1)];
                 fireScore += color.getRed();
                 waterScore += color.getBlue();
