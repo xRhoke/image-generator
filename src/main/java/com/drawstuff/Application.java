@@ -139,10 +139,10 @@ public class Application extends JPanel{
             }
         }
 
-        fireScore = fireScore/10000;
-        earthScore = earthScore/10000;
-        waterScore = waterScore/10000;
-        darkScore = darkScore/10000;
+        fireScore = fireScore;
+        earthScore = earthScore;
+        waterScore = waterScore;
+        darkScore = darkScore;
         lightScore = fireScore+earthScore+waterScore;
         if(fireScore > maxFire) maxFire = fireScore;
         if(earthScore > maxEarth) maxEarth = earthScore;
