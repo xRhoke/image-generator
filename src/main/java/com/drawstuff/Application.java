@@ -57,7 +57,7 @@ public class Application extends JPanel{
         exportButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent evt){
-                exportImages(5);
+                exportImages(1000);
             }
         });
 
